@@ -1,0 +1,3 @@
+en:
+  poll:
+    base_votes_requires_name: "A poll must be named to use the base votes feature"
