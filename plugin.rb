@@ -11,6 +11,8 @@ after_initialize do
     def validate_polls
       result = super
 
+      return result if !result
+
       raw_polls = @post.raw.split("[/poll]")
       post_votes = @post.custom_fields[DiscoursePoll::VOTES_CUSTOM_FIELD]
 
@@ -55,13 +57,15 @@ after_initialize do
                     option_votes = 0
                     option_voters = 0
 
-                    post_votes.each do |_, v|
-                      next unless poll_votes = v[poll_name]
+                    if post_votes.present?
+                      post_votes.each do |_, v|
+                        next unless poll_votes = v[poll_name]
 
-                      poll_votes.each do |option_id|
-                        if option_id === opt['id']
-                          option_votes += 1
-                          option_voters += 1
+                        poll_votes.each do |option_id|
+                          if option_id === opt['id']
+                            option_votes += 1
+                            option_voters += 1
+                          end
                         end
                       end
                     end
