@@ -4,7 +4,8 @@
 # authors: Angus McLeod
 # url: https://github.com/angusmcleod/x-poll-base-votes
 
-register_asset 'stylesheets/x-poll-base-votes.scss'
+register_asset 'stylesheets/common/x-poll-base-votes.scss'
+register_asset 'stylesheets/mobile/x-poll-base-votes.scss', :mobile
 
 after_initialize do
   module BaseVotesPollExtension

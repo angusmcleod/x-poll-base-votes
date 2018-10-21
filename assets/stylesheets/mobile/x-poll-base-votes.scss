@@ -1,0 +1,9 @@
+div.poll {
+  li[data-poll-option-id] {
+    margin-bottom: 0;
+  }
+
+  div.poll-info p {
+    margin: 0.5em 0.5em 0 0.5em;
+  }
+}
