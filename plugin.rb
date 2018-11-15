@@ -44,7 +44,7 @@ after_initialize do
                 end
 
                 ## Go to next poll if this is not a regular poll
-                throw :not_regular_poll unless config_line && config_line.include?('type=regular')
+                #throw :not_regular_poll unless config_line && config_line.include?('type=regular')
 
                 option = line.partition('<!--').first.strip
                 option.gsub!(/[*-]/,'')
