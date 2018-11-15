@@ -39,7 +39,7 @@ after_initialize do
 
                 ## Name is essential for the base votes feature
                 if !poll_name
-                  @post.errors.add(:base, I18n.t("poll.base_votes_requires_poll_name"))
+                  @post.errors.add(:base, I18n.t("poll.base_votes_requires_name"))
                   return result
                 end
 
