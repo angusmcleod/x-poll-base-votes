@@ -54,7 +54,7 @@ after_initialize do
                 anonymous_voters = result[poll_name]['anonymous_voters'] || 0
 
                 result[poll_name]["options"].each do |opt|
-                  if opt['html'].strip === option
+                  if opt['html'].strip.gsub(/[^a-z0-9\s]/i, '') === option.gsub(/[^a-z0-9\s]/i, '')
                     option_votes = 0
                     option_voters = 0
 
