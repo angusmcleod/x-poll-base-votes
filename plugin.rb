@@ -15,7 +15,6 @@ after_initialize do
       return result if !result
 
       raw_polls = @post.raw.split("[/poll]")
-      post_votes = @post.custom_fields[DiscoursePoll::VOTES_CUSTOM_FIELD]
 
       raw_polls.each do |raw_poll|
         poll_name = nil
@@ -48,37 +47,20 @@ after_initialize do
 
                 option = line.partition('<!--').first.strip
                 option.gsub!(/[*-]/,'')
+                option.gsub!(/[^a-z0-9\s]/i, '')
                 option.strip!
 
-                voters = result[poll_name]['voters'] || 0
                 anonymous_voters = result[poll_name]['anonymous_voters'] || 0
 
+                poll_record = Poll.where(post_id: @post.id, name: poll_name)
+
                 result[poll_name]["options"].each do |opt|
-                  if opt['html'].strip.gsub(/[^a-z0-9\s]/i, '') === option.gsub(/[^a-z0-9\s]/i, '')
-                    option_votes = 0
-                    option_voters = 0
-
-                    if post_votes.present?
-                      post_votes.each do |_, v|
-                        next unless poll_votes = v[poll_name]
-
-                        poll_votes.each do |option_id|
-                          if option_id === opt['id']
-                            option_votes += 1
-                            option_voters += 1
-                          end
-                        end
-                      end
-                    end
-
-                    opt["votes"] = option_votes + base
+                  if opt['html'].strip.gsub(/[^a-z0-9\s]/i, '') === option
                     opt['anonymous_votes'] = base
-                    voters += option_voters + base
                     anonymous_voters += base
                   end
                 end
 
-                result[poll_name]['voters'] = voters
                 result[poll_name]['anonymous_voters'] = anonymous_voters
               end
             end
@@ -86,7 +68,26 @@ after_initialize do
         end
       end
 
-      @post.custom_fields[DiscoursePoll::POLLS_CUSTOM_FIELD] = result
+      result.each do |poll_name, poll_data|
+        unless ::Poll.exists?(post_id: @post.id, name: poll_name)
+          DiscoursePoll::Poll.create!(@post.id, poll_data)
+        end
+
+        poll = ::Poll.where(post_id: @post.id, name: poll_name)
+
+        poll.update_all(anonymous_voters: poll_data['anonymous_voters'])
+
+        ::PollOption.where(poll: poll.first).destroy_all
+
+        poll_data['options'].each do |option|
+          ::PollOption.create!(
+            poll: poll.first,
+            digest: option["id"],
+            html: option["html"].strip,
+            anonymous_votes: option['anonymous_votes'],
+          )
+        end
+      end
 
       result
     end
